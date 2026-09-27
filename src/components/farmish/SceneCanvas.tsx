@@ -70,68 +70,180 @@ function CoverPlane({ scene, index, total }: { scene: SceneDef; index: number; t
   );
 }
 
-const BEAN_COLORS = ["#d9c8a9", "#c9b18c", "#8a6b4f", "#6f5238", "#e5d6ba"];
+const BEAN_TEXTURE_URLS = [
+  "/textures/real_beans_clean/real_bean_2.png",
+  "/textures/real_beans_clean/real_bean_3.png",
+  "/textures/real_beans_clean/real_bean_4.png",
+  "/textures/real_beans_clean/real_bean_5.png",
+  "/textures/real_beans_clean/real_bean_6.png",
+  "/textures/real_beans_clean/real_bean_7.png",
+];
+
+function createBeanGeometry(): THREE.BufferGeometry {
+  const segs = 14;
+  const geom = new THREE.BufferGeometry();
+  const positions: number[] = [];
+  const uvs: number[] = [];
+  const indices: number[] = [];
+
+  // Front dome vertices
+  const stride = segs + 1;
+  for (let j = 0; j <= segs; j++) {
+    const v = j / segs;
+    const y = (v - 0.5);
+    for (let i = 0; i <= segs; i++) {
+      const u = i / segs;
+      const x = (u - 0.5);
+      const r2 = (x * 2) * (x * 2) + (y * 2) * (y * 2);
+      const dome = Math.sqrt(Math.max(0, 1 - Math.min(1, r2)));
+      positions.push(x, y, dome * 0.16);
+      uvs.push(u, 1 - v);
+    }
+  }
+
+  // Front indices
+  for (let j = 0; j < segs; j++) {
+    for (let i = 0; i < segs; i++) {
+      const a = j * stride + i;
+      const b = j * stride + i + 1;
+      const c = (j + 1) * stride + i + 1;
+      const d = (j + 1) * stride + i;
+      indices.push(a, b, c, a, c, d);
+    }
+  }
+
+  // Back dome vertices
+  const offset = stride * stride;
+  for (let j = 0; j <= segs; j++) {
+    const v = j / segs;
+    const y = (v - 0.5);
+    for (let i = 0; i <= segs; i++) {
+      const u = i / segs;
+      const x = (u - 0.5);
+      const r2 = (x * 2) * (x * 2) + (y * 2) * (y * 2);
+      const dome = Math.sqrt(Math.max(0, 1 - Math.min(1, r2)));
+      positions.push(x, y, -dome * 0.16);
+      uvs.push(u, 1 - v);
+    }
+  }
+
+  // Back indices (reversed for outwards normals)
+  for (let j = 0; j < segs; j++) {
+    for (let i = 0; i < segs; i++) {
+      const a = offset + j * stride + i;
+      const b = offset + j * stride + i + 1;
+      const c = offset + (j + 1) * stride + i + 1;
+      const d = offset + (j + 1) * stride + i;
+      indices.push(a, c, b, a, d, c);
+    }
+  }
+
+  geom.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geom.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+  geom.setIndex(indices);
+  geom.computeVertexNormals();
+  return geom;
+}
 
 function Beans({ count }: { count: number }) {
-  const ref = useRef<THREE.InstancedMesh>(null);
-  const matRef = useRef<THREE.MeshStandardMaterial>(null);
-  const seeds = useMemo(
-    () =>
-      Array.from({ length: count }, () => ({
-        x: (Math.random() - 0.5) * 4.6,
-        y: (Math.random() - 0.5) * 3.0,
-        z: 3.2 + Math.random() * 1.6,
+  const textures = useTexture(BEAN_TEXTURE_URLS);
+  useMemo(() => {
+    textures.forEach((tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace;
+      tex.anisotropy = 8;
+      tex.generateMipmaps = true;
+    });
+  }, [textures]);
+
+  const beanGeometry = useMemo(() => createBeanGeometry(), []);
+  const meshRefs = useRef<(THREE.InstancedMesh | null)[]>([]);
+  const matRefs = useRef<(THREE.MeshStandardMaterial | null)[]>([]);
+  const perGroup = Math.ceil(count / BEAN_TEXTURE_URLS.length);
+
+  const seeds = useMemo(() => {
+    return Array.from({ length: BEAN_TEXTURE_URLS.length }, () =>
+      Array.from({ length: perGroup }, () => ({
+        x: (Math.random() - 0.5) * 2.8,
+        y: 0.6 + (Math.random() - 0.5) * 2.4,
+        z: 4.0 + Math.random() * 1.6,
         phase: Math.random() * Math.PI * 2,
-        speed: 0.4 + Math.random() * 0.9,
-        s: 0.035 + Math.random() * 0.05,
-      })),
-    [count]
-  );
+        speed: 0.5 + Math.random() * 0.85,
+        rotSpeedX: (Math.random() - 0.5) * 2.6,
+        rotSpeedY: (Math.random() - 0.5) * 3.2,
+        rotSpeedZ: (Math.random() - 0.5) * 2.0,
+        s: 0.26 + Math.random() * 0.12,
+      }))
+    );
+  }, [perGroup]);
+
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
-  useEffect(() => {
-    const m = ref.current;
-    if (!m) return;
-    const c = new THREE.Color();
-    for (let i = 0; i < count; i++) {
-      c.set(BEAN_COLORS[i % BEAN_COLORS.length]);
-      m.setColorAt(i, c);
-    }
-    if (m.instanceColor) m.instanceColor.needsUpdate = true;
-  }, [count]);
-
   useFrame(({ clock }) => {
-    const m = ref.current;
-    const mt = matRef.current;
-    if (!m || !mt) return;
     const p = smooth;
     const env = sstep(0.3, 0.37, p) * (1 - sstep(0.7, 0.78, p));
-    m.visible = env > 0.01;
-    if (!m.visible) return;
-    mt.opacity = env;
-    const t = clock.elapsedTime;
-    const fall = sstep(0.46, 0.66, p);
-    for (let i = 0; i < count; i++) {
-      const sd = seeds[i];
-      const converge = 1 - fall * 0.8;
-      dummy.position.set(
-        (sd.x + Math.sin(t * sd.speed + sd.phase) * 0.25) * converge,
-        sd.y + Math.sin(t * 0.6 + sd.phase) * 0.12 - fall * (2.6 + sd.speed * 1.8),
-        sd.z
-      );
-      dummy.rotation.set(t * sd.speed, sd.phase + t * 0.4, sd.phase);
-      dummy.scale.set(sd.s, sd.s * 0.72, sd.s * 1.25);
-      dummy.updateMatrix();
-      m.setMatrixAt(i, dummy.matrix);
+    const isVis = env > 0.005;
+
+    for (let g = 0; g < BEAN_TEXTURE_URLS.length; g++) {
+      const m = meshRefs.current[g];
+      const mt = matRefs.current[g];
+      if (!m || !mt) continue;
+
+      m.visible = isVis;
+      if (!isVis) continue;
+      mt.opacity = env;
+      mt.alphaTest = 0.3 * Math.min(1, env * 2.5);
+
+      const t = clock.elapsedTime;
+      const fall = sstep(0.46, 0.66, p);
+      const groupSeeds = seeds[g];
+
+      for (let i = 0; i < perGroup; i++) {
+        const sd = groupSeeds[i];
+        const converge = 1 - fall * 0.74;
+        dummy.position.set(
+          (sd.x + Math.sin(t * sd.speed + sd.phase) * 0.16) * converge - fall * 0.05,
+          sd.y + Math.sin(t * 0.5 + sd.phase) * 0.08 - fall * (3.5 + sd.speed * 1.4),
+          sd.z
+        );
+        dummy.rotation.set(
+          sd.phase + t * sd.rotSpeedX + fall * 3.8,
+          sd.phase + t * sd.rotSpeedY + fall * 3.0,
+          sd.phase + t * sd.rotSpeedZ + fall * 1.6
+        );
+        dummy.scale.set(sd.s, sd.s, sd.s);
+        dummy.updateMatrix();
+        m.setMatrixAt(i, dummy.matrix);
+      }
+      m.instanceMatrix.needsUpdate = true;
     }
-    m.instanceMatrix.needsUpdate = true;
   });
 
   return (
-    <instancedMesh ref={ref} args={[undefined, undefined, count]} visible={false}>
-      <sphereGeometry args={[1, 12, 10]} />
-      <meshStandardMaterial ref={matRef} roughness={0.85} metalness={0.05} transparent opacity={0} />
-    </instancedMesh>
+    <group>
+      {textures.map((tex, g) => (
+        <instancedMesh
+          key={g}
+          ref={(el) => {
+            meshRefs.current[g] = el;
+          }}
+          args={[beanGeometry, undefined, perGroup]}
+          visible={false}
+        >
+          <meshStandardMaterial
+            ref={(el) => {
+              matRefs.current[g] = el;
+            }}
+            map={tex}
+            roughness={0.32}
+            metalness={0.02}
+            transparent
+            depthWrite={true}
+            side={THREE.DoubleSide}
+            toneMapped={false}
+          />
+        </instancedMesh>
+      ))}
+    </group>
   );
 }
 
@@ -187,11 +299,12 @@ export function SceneCanvas({ isMobile }: { isMobile: boolean }) {
           {SCENES.map((s, i) => (
             <CoverPlane key={s.id} scene={s} index={i} total={SCENES.length} />
           ))}
-          <Beans count={isMobile ? 90 : 220} />
+          <Beans count={isMobile ? 36 : 66} />
           <Dust count={isMobile ? 120 : 260} />
-          <ambientLight intensity={0.75} color="#ffeedd" />
-          <directionalLight position={[5, 6, 8]} intensity={2.2} color="#ffc98a" />
-          <directionalLight position={[-4, -2, 6]} intensity={0.4} color="#7a9a6d" />
+          <ambientLight intensity={1.0} color="#fff4e5" />
+          <directionalLight position={[4, 5, 8]} intensity={2.6} color="#ffe8c8" />
+          <directionalLight position={[-4, -2, 6]} intensity={0.6} color="#9ec08e" />
+          <pointLight position={[0, 0, 8]} intensity={1.6} color="#ffffff" />
         </Suspense>
       </Canvas>
     </div>
