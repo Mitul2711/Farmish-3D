@@ -71,76 +71,63 @@ function CoverPlane({ scene, index, total }: { scene: SceneDef; index: number; t
 }
 
 const BEAN_TEXTURE_URLS = [
-  "/textures/real_beans_clean/real_bean_2.png",
-  "/textures/real_beans_clean/real_bean_3.png",
-  "/textures/real_beans_clean/real_bean_4.png",
-  "/textures/real_beans_clean/real_bean_5.png",
-  "/textures/real_beans_clean/real_bean_6.png",
-  "/textures/real_beans_clean/real_bean_7.png",
+  "/textures/real_beans_360/bean_360_1.jpg",
+  "/textures/real_beans_360/bean_360_2.jpg",
+  "/textures/real_beans_360/bean_360_3.jpg",
+  "/textures/real_beans_360/bean_360_4.jpg",
+  "/textures/real_beans_360/bean_360_5.jpg",
+  "/textures/real_beans_360/bean_360_6.jpg",
 ];
 
 function createBeanGeometry(): THREE.BufferGeometry {
-  const segs = 14;
-  const geom = new THREE.BufferGeometry();
-  const positions: number[] = [];
-  const uvs: number[] = [];
-  const indices: number[] = [];
+  const geom = new THREE.SphereGeometry(1, 32, 24);
+  const pos = geom.attributes.position;
+  const uvs = geom.attributes.uv;
 
-  // Front dome vertices
-  const stride = segs + 1;
-  for (let j = 0; j <= segs; j++) {
-    const v = j / segs;
-    const y = (v - 0.5);
-    for (let i = 0; i <= segs; i++) {
-      const u = i / segs;
-      const x = (u - 0.5);
-      const r2 = (x * 2) * (x * 2) + (y * 2) * (y * 2);
-      const dome = Math.sqrt(Math.max(0, 1 - Math.min(1, r2)));
-      positions.push(x, y, dome * 0.16);
-      uvs.push(u, 1 - v);
+  for (let i = 0; i < pos.count; i++) {
+    let px = pos.getX(i);
+    let py = pos.getY(i);
+    let pz = pos.getZ(i);
+
+    // 1. Proportions of authentic heirloom pinto bean:
+    // Y: Length (2.9)
+    // X: Width / Kidney curve axis (2.0)
+    // Z: Thickness / 3D depth (1.25)
+    py *= 1.45;
+    px *= 1.0;
+    pz *= 0.65;
+
+    // 2. Kidney bean curvature along length Y:
+    // Inner belly (-X) curves inward (concave hilum depression)
+    // Outer spine (+X) curves outward (smooth convex arch)
+    const ny = Math.abs(py / 1.45);
+    const midCurve = Math.max(0, 1.0 - ny * ny);
+
+    if (px < 0) {
+      px *= (1.0 - midCurve * 0.32); // Inward concave belly
+    } else {
+      px *= (1.0 + midCurve * 0.14); // Convex arched spine
     }
+
+    // Organic taper: slightly fuller on one half
+    const taper = 1.0 + 0.1 * (py / 1.45);
+    px *= taper;
+    pz *= taper;
+
+    pos.setXYZ(i, px, py, pz);
+
+    // 3. Exact 360 equirectangular UV mapping:
+    // v: 0 at south pole to 1 at north pole
+    const v = THREE.MathUtils.clamp(0.5 + py / (2 * 1.45), 0.001, 0.999);
+    // angle around Y axis
+    const angle = Math.atan2(px, pz);
+    // u: 0.5 at front (+Z), 0.0/1.0 at back (-Z), 0.25 at belly (-X), 0.75 at spine (+X)
+    let u = 0.5 + angle / (2 * Math.PI);
+    if (u < 0) u += 1;
+    if (u > 1) u -= 1;
+    uvs.setXY(i, u, v);
   }
 
-  // Front indices
-  for (let j = 0; j < segs; j++) {
-    for (let i = 0; i < segs; i++) {
-      const a = j * stride + i;
-      const b = j * stride + i + 1;
-      const c = (j + 1) * stride + i + 1;
-      const d = (j + 1) * stride + i;
-      indices.push(a, b, c, a, c, d);
-    }
-  }
-
-  // Back dome vertices
-  const offset = stride * stride;
-  for (let j = 0; j <= segs; j++) {
-    const v = j / segs;
-    const y = (v - 0.5);
-    for (let i = 0; i <= segs; i++) {
-      const u = i / segs;
-      const x = (u - 0.5);
-      const r2 = (x * 2) * (x * 2) + (y * 2) * (y * 2);
-      const dome = Math.sqrt(Math.max(0, 1 - Math.min(1, r2)));
-      positions.push(x, y, -dome * 0.16);
-      uvs.push(u, 1 - v);
-    }
-  }
-
-  // Back indices (reversed for outwards normals)
-  for (let j = 0; j < segs; j++) {
-    for (let i = 0; i < segs; i++) {
-      const a = offset + j * stride + i;
-      const b = offset + j * stride + i + 1;
-      const c = offset + (j + 1) * stride + i + 1;
-      const d = offset + (j + 1) * stride + i;
-      indices.push(a, c, b, a, d, c);
-    }
-  }
-
-  geom.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
-  geom.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
-  geom.setIndex(indices);
   geom.computeVertexNormals();
   return geom;
 }
@@ -168,10 +155,10 @@ function Beans({ count }: { count: number }) {
         z: 4.0 + Math.random() * 1.6,
         phase: Math.random() * Math.PI * 2,
         speed: 0.5 + Math.random() * 0.85,
-        rotSpeedX: (Math.random() - 0.5) * 2.6,
-        rotSpeedY: (Math.random() - 0.5) * 3.2,
-        rotSpeedZ: (Math.random() - 0.5) * 2.0,
-        s: 0.26 + Math.random() * 0.12,
+        rotSpeedX: (Math.random() - 0.5) * 2.4,
+        rotSpeedY: (Math.random() - 0.5) * 3.0,
+        rotSpeedZ: (Math.random() - 0.5) * 1.8,
+        s: 0.082 + Math.random() * 0.038,
       }))
     );
   }, [perGroup]);
@@ -191,7 +178,7 @@ function Beans({ count }: { count: number }) {
       m.visible = isVis;
       if (!isVis) continue;
       mt.opacity = env;
-      mt.alphaTest = 0.3 * Math.min(1, env * 2.5);
+      mt.depthWrite = env > 0.92;
 
       const t = clock.elapsedTime;
       const fall = sstep(0.46, 0.66, p);
@@ -219,7 +206,7 @@ function Beans({ count }: { count: number }) {
   });
 
   return (
-    <group>
+    <group renderOrder={10}>
       {textures.map((tex, g) => (
         <instancedMesh
           key={g}
@@ -228,17 +215,18 @@ function Beans({ count }: { count: number }) {
           }}
           args={[beanGeometry, undefined, perGroup]}
           visible={false}
+          renderOrder={10}
         >
           <meshStandardMaterial
             ref={(el) => {
               matRefs.current[g] = el;
             }}
             map={tex}
-            roughness={0.32}
+            color="#bca38e"
+            roughness={0.38}
             metalness={0.02}
             transparent
-            depthWrite={true}
-            side={THREE.DoubleSide}
+            depthWrite={false}
             toneMapped={false}
           />
         </instancedMesh>
@@ -299,12 +287,12 @@ export function SceneCanvas({ isMobile }: { isMobile: boolean }) {
           {SCENES.map((s, i) => (
             <CoverPlane key={s.id} scene={s} index={i} total={SCENES.length} />
           ))}
-          <Beans count={isMobile ? 36 : 66} />
+          <Beans count={isMobile ? 54 : 96} />
           <Dust count={isMobile ? 120 : 260} />
-          <ambientLight intensity={1.0} color="#fff4e5" />
-          <directionalLight position={[4, 5, 8]} intensity={2.6} color="#ffe8c8" />
-          <directionalLight position={[-4, -2, 6]} intensity={0.6} color="#9ec08e" />
-          <pointLight position={[0, 0, 8]} intensity={1.6} color="#ffffff" />
+          <ambientLight intensity={0.7} color="#ede0cf" />
+          <directionalLight position={[4, 5, 8]} intensity={1.7} color="#f2dfc5" />
+          <directionalLight position={[-4, -2, 6]} intensity={0.4} color="#8fb380" />
+          <pointLight position={[0, 0, 8]} intensity={0.9} color="#fff0db" />
         </Suspense>
       </Canvas>
     </div>
