@@ -1,4 +1,4 @@
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Leaf, ShieldCheck, Truck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { NavigationHeader } from "@/components/farmish/NavigationHeader";
 import { IMGS } from "@/lib/journeyStore";
@@ -34,6 +34,18 @@ const standards = [
   "Fair-price promise",
   "Small-batch packing",
   "48-hour farm to door",
+];
+
+const promises = [
+  { icon: Leaf, title: "Farmer direct", text: "Every item is sourced from trusted growers we know by name." },
+  { icon: ShieldCheck, title: "Transparent quality", text: "Selected for freshness, flavor, and honest farming standards." },
+  { icon: Truck, title: "Delivered fast", text: "Packed carefully and delivered within 48 hours of harvest." },
+];
+
+const fieldNotes = [
+  { title: "What makes a great harvest?", text: "We talk about timing, care, and how good soil shapes flavor.", image: IMGS.selection },
+  { title: "How we choose what lands in your box", text: "A practical look at selection standards from the farm gate to your table.", image: IMGS.beans },
+  { title: "Why freshness changes everything", text: "Learn why delivery windows and careful packing matter as much as the crop itself.", image: IMGS.pack },
 ];
 
 export default function WhyFarmish() {
@@ -73,6 +85,20 @@ export default function WhyFarmish() {
             </p>
           </div>
 
+          <div className="mt-10 grid gap-x-8 gap-y-6 md:grid-cols-3">
+            {promises.map(({ icon: Icon, title, text }) => (
+              <article key={title} className="flex items-start gap-3 border-t border-[#D9C8A5] pt-5">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#D4A359]/15 text-[#A36E1F]">
+                  <Icon className="h-5 w-5" aria-hidden="true" />
+                </div>
+                <div>
+                  <h3 className="font-heading text-xl text-[#1D2B25]">{title}</h3>
+                  <p className="mt-1 text-sm leading-relaxed text-[#4F5F59]">{text}</p>
+                </div>
+              </article>
+            ))}
+          </div>
+
           <div className="mt-12 grid gap-x-10 gap-y-14 md:grid-cols-2 lg:grid-cols-3">
             {commitments.map((commitment) => (
               <article key={commitment.number}>
@@ -89,6 +115,35 @@ export default function WhyFarmish() {
                 <p className="mt-3 text-sm leading-relaxed text-[#53635D]">{commitment.description}</p>
               </article>
             ))}
+          </div>
+        </section>
+
+        <section id="farmers" className="border-y border-[#E8D9BF] bg-[#F1E7D5]">
+          <div className="mx-auto grid max-w-7xl gap-10 px-6 py-20 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+            <div className="overflow-hidden rounded-lg border border-[#E8D9BF] bg-[#FFFDF9]">
+              <img src={IMGS.harvest} alt="Farmer in field" className="h-full min-h-[360px] w-full object-cover" />
+            </div>
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#A36E1F]">Our growers</p>
+              <h2 className="mt-4 font-heading text-4xl text-[#1D2B25] sm:text-5xl">Partnered with growers we trust.</h2>
+              <p className="mt-5 max-w-xl text-lg leading-relaxed text-[#4F5F59]">
+                We work with small farms that grow with care, respect the land, and harvest at the right moment so your food arrives at its best.
+              </p>
+              <div className="mt-8 grid gap-4 border-t border-[#D9C8A5] pt-5 sm:grid-cols-3">
+                <div>
+                  <p className="font-heading text-3xl text-[#1D2B25]">42</p>
+                  <p className="mt-2 text-sm text-[#4F5F59]">grower partners</p>
+                </div>
+                <div>
+                  <p className="font-heading text-3xl text-[#1D2B25]">48h</p>
+                  <p className="mt-2 text-sm text-[#4F5F59]">to your door</p>
+                </div>
+                <div>
+                  <p className="font-heading text-3xl text-[#1D2B25]">100%</p>
+                  <p className="mt-2 text-sm text-[#4F5F59]">transparent sourcing</p>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -111,6 +166,24 @@ export default function WhyFarmish() {
                 </li>
               ))}
             </ul>
+          </div>
+        </section>
+
+        <section id="journal" className="mx-auto max-w-7xl px-6 py-20">
+          <div className="mb-10 text-center">
+            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#A36E1F]">Farmish journal</p>
+            <h2 className="mt-4 font-heading text-4xl text-[#1D2B25] sm:text-5xl">Notes from the field</h2>
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            {fieldNotes.map((entry) => (
+              <article key={entry.title} className="overflow-hidden rounded-md border border-[#E8D9BF] bg-[#FFFDF9]">
+                <img src={entry.image} alt={entry.title} loading="lazy" className="h-56 w-full object-cover" />
+                <div className="p-5">
+                  <h3 className="font-heading text-2xl text-[#1D2B25]">{entry.title}</h3>
+                  <p className="mt-3 text-sm leading-relaxed text-[#4F5F59]">{entry.text}</p>
+                </div>
+              </article>
+            ))}
           </div>
         </section>
 

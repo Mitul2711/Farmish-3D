@@ -1,8 +1,9 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Heart, Menu, X } from "lucide-react";
 import { WheatMark } from "./Logo";
 import { scrollToId } from "@/lib/journeyStore";
+import { FAVORITES_CHANGE_EVENT, readFavoriteIds } from "@/lib/shopProducts";
 
 type NavigationHeaderProps = {
   sticky?: boolean;
@@ -12,6 +13,7 @@ type NavigationHeaderProps = {
 export function NavigationHeader({ sticky = false, action }: NavigationHeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [favoriteCount, setFavoriteCount] = useState(() => readFavoriteIds().length);
   const location = useLocation();
 
   useEffect(() => {
@@ -19,6 +21,16 @@ export function NavigationHeader({ sticky = false, action }: NavigationHeaderPro
     fn();
     window.addEventListener("scroll", fn, { passive: true });
     return () => window.removeEventListener("scroll", fn);
+  }, []);
+
+  useEffect(() => {
+    const updateFavoriteCount = () => setFavoriteCount(readFavoriteIds().length);
+    window.addEventListener(FAVORITES_CHANGE_EVENT, updateFavoriteCount);
+    window.addEventListener("storage", updateFavoriteCount);
+    return () => {
+      window.removeEventListener(FAVORITES_CHANGE_EVENT, updateFavoriteCount);
+      window.removeEventListener("storage", updateFavoriteCount);
+    };
   }, []);
 
   useEffect(() => {
@@ -78,7 +90,18 @@ export function NavigationHeader({ sticky = false, action }: NavigationHeaderPro
           <Link to="/why-farmish" className="transition-colors hover:text-[#A36E1F]">Why Farmish</Link>
           <Link to="/contact" className="transition-colors hover:text-[#A36E1F]">Contact</Link>
         </nav>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <Link
+            to="/favorites"
+            aria-label={`Favorites, ${favoriteCount} saved`}
+            title="Favorites"
+            className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-[#A36E1F] transition-colors hover:bg-[#D4A359]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A36E1F]"
+          >
+            <Heart className="h-5 w-5" aria-hidden="true" />
+            <span aria-hidden="true" className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full border border-[#FFFDF9] bg-[#285A43] p-0 text-center font-mono text-[9px] font-semibold leading-5 text-white">
+              {favoriteCount}
+            </span>
+          </Link>
           {action ?? (
             <Link
               to="/shop"
@@ -89,6 +112,12 @@ export function NavigationHeader({ sticky = false, action }: NavigationHeaderPro
             </Link>
           )}
         </div>
+        <Link
+          to="/login"
+          className="ml-4 hidden font-mono text-[10px] uppercase tracking-[0.15em] text-[#53635D] transition-colors hover:text-[#A36E1F] md:inline-flex"
+        >
+          Sign In
+        </Link>
         <button
           type="button"
           className="ml-2 inline-flex h-10 w-10 items-center justify-center rounded-full text-[#1D2B25] transition-colors hover:bg-[#D4A359]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A36E1F] md:hidden"
@@ -129,11 +158,26 @@ export function NavigationHeader({ sticky = false, action }: NavigationHeaderPro
               Contact
             </Link>
             <Link
+              to="/favorites"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-center gap-2 border-b border-[#E8D9BF] py-4 font-mono text-[11px] uppercase tracking-[0.16em] text-[#53635D] transition-colors hover:text-[#A36E1F]"
+            >
+              <Heart className="h-4 w-4" aria-hidden="true" />
+              Favorites
+            </Link>
+            <Link
               to="/shop"
               onClick={() => setMobileOpen(false)}
               className="my-3 rounded-full bg-[#D4A359] px-4 py-3 text-center font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[#1D2B25] transition-colors hover:bg-[#E8B86D]"
             >
               Shop Fresh
+            </Link>
+            <Link
+              to="/login"
+              onClick={() => setMobileOpen(false)}
+              className="mb-3 py-3 text-center font-mono text-[11px] font-semibold uppercase tracking-[0.16em] text-[#53635D] transition-colors hover:text-[#A36E1F]"
+            >
+              Sign In
             </Link>
           </div>
         </nav>

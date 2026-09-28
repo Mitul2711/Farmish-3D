@@ -1,112 +1,28 @@
 import { useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Leaf, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
+import { ArrowRight, Heart, Leaf, Search, ShoppingBag } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { NavigationHeader } from "@/components/farmish/NavigationHeader";
 import { IMGS } from "@/lib/journeyStore";
+import { CART_KEY, addProductToCart, products, readFavoriteIds, saveFavoriteIds, type Product, type ProductCategory } from "@/lib/shopProducts";
 
-type Product = {
-  id: string;
-  name: string;
-  subtitle: string;
-  image: string;
-  basePrice: number;
-  note: string;
-  weights: { label: string; price: number }[];
+type ProductSort = "featured" | "price-low-high" | "price-high-low" | "name-a-z";
+
+const sortLabels: Record<ProductSort, string> = {
+  featured: "Featured",
+  "price-low-high": "Price: low to high",
+  "price-high-low": "Price: high to low",
+  "name-a-z": "Name: A to Z",
 };
-
-const CART_KEY = "farmish-cart";
-
-const products: Product[] = [
-  {
-    id: "greens-box",
-    name: "Heirloom Greens Box",
-    subtitle: "Seasonal harvest",
-    image: IMGS.field,
-    basePrice: 24,
-    note: "Curated for slow dinners",
-    weights: [
-      { label: "500g", price: 24 },
-      { label: "1kg", price: 38 },
-      { label: "2kg", price: 62 },
-    ],
-  },
-  {
-    id: "golden-bean-bundle",
-    name: "Golden Bean Bundle",
-    subtitle: "Small-batch roasted",
-    image: IMGS.beans,
-    basePrice: 18,
-    note: "Farmer direct and freshly packed",
-    weights: [
-      { label: "250g", price: 18 },
-      { label: "500g", price: 28 },
-      { label: "1kg", price: 45 },
-    ],
-  },
-  {
-    id: "root-leaf-mix",
-    name: "Root & Leaf Mix",
-    subtitle: "Picked this week",
-    image: IMGS.harvest,
-    basePrice: 21,
-    note: "Balanced greens from local growers",
-    weights: [
-      { label: "500g", price: 21 },
-      { label: "1kg", price: 34 },
-      { label: "2kg", price: 58 },
-    ],
-  },
-  {
-    id: "kitchen-staple-set",
-    name: "Kitchen Staple Set",
-    subtitle: "Everyday essentials",
-    image: IMGS.pack,
-    basePrice: 29,
-    note: "A pantry upgrade for real meals",
-    weights: [
-      { label: "1 pack", price: 29 },
-      { label: "2 packs", price: 52 },
-      { label: "3 packs", price: 74 },
-    ],
-  },
-  {
-    id: "citrus-sunrise-box",
-    name: "Citrus Sunrise Box",
-    subtitle: "Fresh from the grove",
-    image: IMGS.selection,
-    basePrice: 26,
-    note: "Bright, juicy, and harvest-ready",
-    weights: [
-      { label: "1 box", price: 26 },
-      { label: "2 boxes", price: 42 },
-      { label: "3 boxes", price: 60 },
-    ],
-  },
-  {
-    id: "family-farm-basket",
-    name: "Family Farm Basket",
-    subtitle: "Weekly share",
-    image: IMGS.delivery,
-    basePrice: 36,
-    note: "A fuller box of orchard and field picks",
-    weights: [
-      { label: "1 basket", price: 36 },
-      { label: "2 baskets", price: 66 },
-      { label: "3 baskets", price: 90 },
-    ],
-  },
-];
-
-const promises = [
-  { icon: Leaf, title: "Farmer direct", text: "Every item is sourced from trusted growers we know by name." },
-  { icon: ShieldCheck, title: "Transparent quality", text: "Selected for freshness, flavor, and honest farming standards." },
-  { icon: Truck, title: "Delivered fast", text: "Packed carefully and delivered within 48 hours of harvest." },
-];
 
 export default function Shop() {
   const prefersReducedMotion = useReducedMotion() ?? false;
   const [cartCount, setCartCount] = useState(0);
+  const [favoriteIds, setFavoriteIds] = useState(readFavoriteIds);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState<ProductCategory | "All">("All");
+  const [sortOrder, setSortOrder] = useState<ProductSort>("featured");
   const [selectedWeights, setSelectedWeights] = useState<Record<string, string>>(
     () => Object.fromEntries(products.map((product) => [product.id, product.weights[0].label])),
   );
@@ -125,24 +41,33 @@ export default function Shop() {
   }, []);
 
   const addToCart = (product: Product, weightLabel: string, weightPrice: number) => {
-    const raw = window.localStorage.getItem(CART_KEY);
-    const current = raw
-      ? (JSON.parse(raw) as Array<{ id: string; name: string; image: string; price: number; weight: string; qty: number }>)
-      : [];
-
-    const existing = current.find((item) => item.id === product.id && item.weight === weightLabel);
-
-    const next = existing
-      ? current.map((item) =>
-          item.id === product.id && item.weight === weightLabel
-            ? { ...item, qty: item.qty + 1, price: weightPrice }
-            : item,
-        )
-      : [...current, { id: product.id, name: product.name, image: product.image, price: weightPrice, weight: weightLabel, qty: 1 }];
-
-    window.localStorage.setItem(CART_KEY, JSON.stringify(next));
-    setCartCount(next.reduce((sum, item) => sum + item.qty, 0));
+    setCartCount(addProductToCart(product, weightLabel, weightPrice));
   };
+
+  const toggleFavorite = (productId: string) => {
+    const next = favoriteIds.includes(productId)
+      ? favoriteIds.filter((id) => id !== productId)
+      : [...favoriteIds, productId];
+
+    saveFavoriteIds(next);
+    setFavoriteIds(next);
+  };
+
+  const filteredProducts = products
+    .filter((product) => {
+      const matchesCategory = categoryFilter === "All" || product.category === categoryFilter;
+      const searchText = `${product.name} ${product.subtitle} ${product.note}`.toLowerCase();
+      return matchesCategory && searchText.includes(searchQuery.trim().toLowerCase());
+    })
+    .sort((first, second) => {
+      if (sortOrder === "price-low-high") return first.basePrice - second.basePrice;
+      if (sortOrder === "price-high-low") return second.basePrice - first.basePrice;
+      if (sortOrder === "name-a-z") return first.name.localeCompare(second.name);
+      return 0;
+    });
+  const favoriteProducts = favoriteIds
+    .map((id) => products.find((product) => product.id === id))
+    .filter((product): product is Product => product !== undefined);
 
   return (
     <div className="min-h-screen bg-[#F7F2E8] text-[#1D2B25] antialiased">
@@ -178,7 +103,7 @@ export default function Shop() {
                   Shop this week
                   <ArrowRight className="h-4 w-4" />
                 </a>
-                <Link to="/" className="inline-flex items-center justify-center rounded-full border border-[#D4A359]/50 bg-white/30 px-7 py-3.5 text-sm font-semibold text-[#1D2B25] transition-all duration-300 hover:border-[#D4A359] hover:bg-[#D4A359]/10">
+                <Link to="/why-farmish" className="inline-flex items-center justify-center rounded-full border border-[#D4A359]/50 bg-white/30 px-7 py-3.5 text-sm font-semibold text-[#1D2B25] transition-all duration-300 hover:border-[#D4A359] hover:bg-[#D4A359]/10">
                   Explore story
                 </Link>
               </div>
@@ -201,38 +126,98 @@ export default function Shop() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-6 py-6">
-          <div className="grid gap-4 rounded-[1.75rem] border border-[#E8D9BF] bg-[#FFFDF9]/80 p-4 md:grid-cols-3">
-            {promises.map(({ icon: Icon, title, text }) => (
-              <div key={title} className="flex items-start gap-3 rounded-2xl bg-[#F7F2E8] p-5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#D4A359]/15 text-[#A36E1F]">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <div>
-                  <p className="font-heading text-xl text-[#1D2B25]">{title}</p>
-                  <p className="mt-1 text-sm leading-relaxed text-[#4F5F59]">{text}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
         <section id="featured" className="mx-auto max-w-7xl px-6 py-20">
-          <div className="mb-10 flex items-end justify-between gap-4">
+          <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#A36E1F]">Featured picks</p>
               <h2 className="mt-3 font-heading text-4xl tracking-[-0.03em] text-[#1D2B25] sm:text-5xl">Fresh from the fields</h2>
             </div>
+            <Link to="/favorites" className="inline-flex min-h-10 items-center gap-2 text-sm font-semibold text-[#285A43] transition-colors hover:text-[#A36E1F]">
+              <Heart className="h-4 w-4" aria-hidden="true" />
+              Favorites <span className="text-[#53635D]">({favoriteProducts.length})</span>
+            </Link>
           </div>
 
+          <div className="mb-6 grid gap-4 border-y border-[#E8D9BF] py-5 md:grid-cols-[minmax(220px,1fr)_minmax(150px,220px)_minmax(170px,220px)] md:items-end">
+            <div>
+              <label htmlFor="shop-search" className="mb-2 block text-xs font-semibold text-[#1D2B25]">Search products</label>
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#7A796E]" aria-hidden="true" />
+                <input
+                  id="shop-search"
+                  data-testid="shop-search-input"
+                  type="search"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="Search the collection"
+                  className="w-full rounded-md border border-[#D9C8A5] bg-[#FFFDF9] py-2.5 pl-10 pr-3 text-sm text-[#1D2B25] outline-none transition focus:border-[#285A43] focus:ring-2 focus:ring-[#285A43]/15"
+                />
+              </div>
+            </div>
+            <div>
+              <span id="shop-category-label" className="mb-2 block text-xs font-semibold text-[#1D2B25]">Category</span>
+              <Select value={categoryFilter} onValueChange={(value) => setCategoryFilter(value as ProductCategory | "All")}>
+                <SelectTrigger
+                  id="shop-category-filter"
+                  data-testid="shop-category-filter"
+                  aria-labelledby="shop-category-label"
+                  className="h-10 w-full rounded-md border-[#D9C8A5] bg-[#FFFDF9] px-3 text-sm text-[#1D2B25] hover:bg-[#F3E7D2] focus-visible:border-[#285A43] focus-visible:ring-2 focus-visible:ring-[#285A43]/15 dark:bg-[#FFFDF9] dark:hover:bg-[#F3E7D2]"
+                >
+                  <SelectValue>{categoryFilter === "All" ? "All categories" : categoryFilter}</SelectValue>
+                </SelectTrigger>
+                <SelectContent side="bottom" align="start" alignItemWithTrigger={false} className="rounded-md border border-[#E8D9BF] bg-[#FFFDF9] p-1 text-[#1D2B25] shadow-[0_12px_30px_rgba(29,43,37,0.12)]">
+                  <SelectItem value="All" className="rounded-sm py-2 data-[highlighted]:bg-[#F3E7D2] data-[highlighted]:text-[#1D2B25]">All categories</SelectItem>
+                  <SelectItem value="Produce" className="rounded-sm py-2 data-[highlighted]:bg-[#F3E7D2] data-[highlighted]:text-[#1D2B25]">Produce</SelectItem>
+                  <SelectItem value="Pantry" className="rounded-sm py-2 data-[highlighted]:bg-[#F3E7D2] data-[highlighted]:text-[#1D2B25]">Pantry</SelectItem>
+                  <SelectItem value="Fruit" className="rounded-sm py-2 data-[highlighted]:bg-[#F3E7D2] data-[highlighted]:text-[#1D2B25]">Fruit</SelectItem>
+                  <SelectItem value="Bundles" className="rounded-sm py-2 data-[highlighted]:bg-[#F3E7D2] data-[highlighted]:text-[#1D2B25]">Bundles</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <span id="shop-sort-label" className="mb-2 block text-xs font-semibold text-[#1D2B25]">Sort by</span>
+              <Select value={sortOrder} onValueChange={(value) => setSortOrder(value as ProductSort)}>
+                <SelectTrigger
+                  id="shop-sort-filter"
+                  data-testid="shop-sort-filter"
+                  aria-labelledby="shop-sort-label"
+                  className="h-10 w-full rounded-md border-[#D9C8A5] bg-[#FFFDF9] px-3 text-sm text-[#1D2B25] hover:bg-[#F3E7D2] focus-visible:border-[#285A43] focus-visible:ring-2 focus-visible:ring-[#285A43]/15 dark:bg-[#FFFDF9] dark:hover:bg-[#F3E7D2]"
+                >
+                  <SelectValue>{sortLabels[sortOrder]}</SelectValue>
+                </SelectTrigger>
+                <SelectContent side="bottom" align="start" alignItemWithTrigger={false} className="rounded-md border border-[#E8D9BF] bg-[#FFFDF9] p-1 text-[#1D2B25] shadow-[0_12px_30px_rgba(29,43,37,0.12)]">
+                  <SelectItem value="featured" className="rounded-sm py-2 data-[highlighted]:bg-[#F3E7D2] data-[highlighted]:text-[#1D2B25]">Featured</SelectItem>
+                  <SelectItem value="price-low-high" className="rounded-sm py-2 data-[highlighted]:bg-[#F3E7D2] data-[highlighted]:text-[#1D2B25]">Price: low to high</SelectItem>
+                  <SelectItem value="price-high-low" className="rounded-sm py-2 data-[highlighted]:bg-[#F3E7D2] data-[highlighted]:text-[#1D2B25]">Price: high to low</SelectItem>
+                  <SelectItem value="name-a-z" className="rounded-sm py-2 data-[highlighted]:bg-[#F3E7D2] data-[highlighted]:text-[#1D2B25]">Name: A to Z</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <p className="mb-5 text-sm text-[#53635D]" aria-live="polite">
+            {filteredProducts.length} {filteredProducts.length === 1 ? "product" : "products"}
+          </p>
+
+          {filteredProducts.length > 0 ? (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-            {products.map((product) => {
+            {filteredProducts.map((product) => {
               const selectedWeight = product.weights.find((weight) => weight.label === selectedWeights[product.id]) ?? product.weights[0];
+              const isFavorite = favoriteIds.includes(product.id);
 
               return (
               <article key={product.id} className="group overflow-hidden rounded-lg border border-[#E8D9BF] bg-[#FFFDF9] shadow-[0_16px_38px_rgba(28,31,25,0.06)] transition-shadow duration-300 hover:shadow-[0_20px_45px_rgba(28,31,25,0.12)]">
                 <div className="relative overflow-hidden">
                   <img src={product.image} alt={product.name} className="h-64 w-full object-cover transition duration-500 group-hover:scale-[1.03]" />
+                  <button
+                    type="button"
+                    onClick={() => toggleFavorite(product.id)}
+                    aria-label={`${isFavorite ? "Remove" : "Add"} ${product.name} ${isFavorite ? "from" : "to"} favorites`}
+                    aria-pressed={isFavorite}
+                    className="absolute right-4 top-4 inline-flex h-10 w-10 items-center justify-center rounded-full border border-[#E8D9BF] bg-[#FFFDF9]/95 text-[#A36E1F] shadow-sm transition-colors hover:bg-[#F3E7D2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A36E1F]"
+                  >
+                    <Heart className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} aria-hidden="true" />
+                  </button>
                   <span className="absolute left-4 top-4 rounded-sm border border-white/80 bg-[#FFFDF9]/85 px-3 py-1 font-mono text-[9px] uppercase tracking-[0.16em] text-[#1D2B25] backdrop-blur-sm">
                     {product.subtitle}
                   </span>
@@ -286,59 +271,24 @@ export default function Shop() {
               );
             })}
           </div>
-        </section>
-
-        <section id="farmers" className="border-y border-[#E8D9BF] bg-[#F1E7D5]">
-          <div className="mx-auto grid max-w-7xl gap-10 px-6 py-20 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
-            <div className="overflow-hidden rounded-[1.75rem] border border-[#E8D9BF] bg-[#FFFDF9]">
-              <img src={IMGS.harvest} alt="Farmer in field" className="h-full min-h-[420px] w-full object-cover" />
+          ) : (
+            <div className="border-y border-[#E8D9BF] py-14 text-center">
+              <p className="font-heading text-2xl text-[#1D2B25]">No products found</p>
+              <p className="mt-2 text-sm text-[#53635D]">Try another search or category.</p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery("");
+                  setCategoryFilter("All");
+                }}
+                className="mt-5 text-sm font-semibold text-[#285A43] underline decoration-[#D4A359] underline-offset-4 hover:text-[#A36E1F]"
+              >
+                Clear filters
+              </button>
             </div>
-            <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#A36E1F]">Our growers</p>
-              <h2 className="mt-4 font-heading text-4xl tracking-[-0.03em] text-[#1D2B25] sm:text-5xl">Partnered with growers we trust.</h2>
-              <p className="mt-5 max-w-xl text-lg leading-relaxed text-[#4F5F59]">
-                We work with small farms that grow with care, respect the land, and harvest at the right moment so your food arrives at its best.
-              </p>
-              <div className="mt-8 grid gap-4 sm:grid-cols-3">
-                <div className="rounded-2xl bg-[#FFFDF9] p-4">
-                  <p className="font-heading text-3xl text-[#1D2B25]">42</p>
-                  <p className="mt-2 text-sm text-[#4F5F59]">grower partners</p>
-                </div>
-                <div className="rounded-2xl bg-[#FFFDF9] p-4">
-                  <p className="font-heading text-3xl text-[#1D2B25]">48h</p>
-                  <p className="mt-2 text-sm text-[#4F5F59]">to your door</p>
-                </div>
-                <div className="rounded-2xl bg-[#FFFDF9] p-4">
-                  <p className="font-heading text-3xl text-[#1D2B25]">100%</p>
-                  <p className="mt-2 text-sm text-[#4F5F59]">transparent sourcing</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          )}
         </section>
 
-        <section id="journal" className="mx-auto max-w-7xl px-6 py-20">
-          <div className="mb-10 text-center">
-            <p className="font-mono text-[11px] uppercase tracking-[0.3em] text-[#A36E1F]">Farmish journal</p>
-            <h2 className="mt-4 font-heading text-4xl tracking-[-0.03em] text-[#1D2B25] sm:text-5xl">Notes from the field</h2>
-          </div>
-
-          <div className="grid gap-6 md:grid-cols-3">
-            {[
-              { title: "What makes a great harvest?", text: "We talk about timing, care, and how good soil shapes flavor.", image: IMGS.selection },
-              { title: "How we choose what lands in your box", text: "A practical look at selection standards from the farm gate to your table.", image: IMGS.beans },
-              { title: "Why freshness changes everything", text: "Learn why delivery windows and careful packing matter as much as the crop itself.", image: IMGS.pack },
-            ].map((entry) => (
-              <article key={entry.title} className="overflow-hidden rounded-[1.5rem] border border-[#E8D9BF] bg-[#FFFDF9]">
-                <img src={entry.image} alt={entry.title} className="h-56 w-full object-cover" />
-                <div className="p-5">
-                  <p className="font-heading text-2xl text-[#1D2B25]">{entry.title}</p>
-                  <p className="mt-3 text-sm leading-relaxed text-[#4F5F59]">{entry.text}</p>
-                </div>
-              </article>
-            ))}
-          </div>
-        </section>
       </main>
     </div>
   );
