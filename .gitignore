@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Generated crash recordings
+.emergent/recordings/crash-*
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

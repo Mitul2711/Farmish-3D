@@ -98,9 +98,11 @@ export function NavigationHeader({ sticky = false, action }: NavigationHeaderPro
             className="relative inline-flex h-10 w-10 items-center justify-center rounded-full text-[#A36E1F] transition-colors hover:bg-[#D4A359]/20 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#A36E1F]"
           >
             <Heart className="h-5 w-5" aria-hidden="true" />
-            <span aria-hidden="true" className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full border border-[#FFFDF9] bg-[#285A43] p-0 text-center font-mono text-[9px] font-semibold leading-5 text-white">
-              {favoriteCount}
-            </span>
+            {favoriteCount > 0 && (
+              <span aria-hidden="true" className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full border border-[#FFFDF9] bg-[#285A43] p-0 text-center font-mono text-[9px] font-semibold leading-5 text-white">
+                {favoriteCount}
+              </span>
+            )}
           </Link>
           {action ?? (
             <Link

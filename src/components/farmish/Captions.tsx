@@ -98,7 +98,7 @@ export function HeroIntro({ progress }: { progress: MotionValue<number> }) {
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 0.45, ease: EASE }}
-        className="mb-6 font-mono text-[11px] uppercase tracking-[0.35em] text-[#E7DDC7]"
+        className="mb-6 font-mono text-[11px] uppercase tracking-[0.35em] text-[#1D2B25]"
       >
         Farmish · Farmer-Direct Grocery
       </motion.p>
