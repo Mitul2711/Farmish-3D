@@ -33,7 +33,7 @@ export default function Login({ mode = "signin" }: LoginProps) {
             <WheatMark className="h-9 w-9 text-[#A36E1F]" />
             <span>
               <span className="block font-heading text-2xl leading-none text-[#1D2B25]">Farmish</span>
-              <span className="mt-1 block font-mono text-[8px] uppercase tracking-[0.2em] text-[#53635D]">Farm to Home</span>
+              <span className="mt-1 block font-mono text-[8px] uppercase tracking-[0.2em] text-[#53635D]">Farm to Family</span>
             </span>
           </Link>
 

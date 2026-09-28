@@ -76,7 +76,7 @@ export function NavigationHeader({ sticky = false, action }: NavigationHeaderPro
           <WheatMark className="h-7 w-7 text-[#D4A359] transition-transform duration-500 group-hover:rotate-12" />
           <span className="flex flex-col items-start leading-none">
             <span className="font-heading text-xl tracking-tight text-[#1D2B25]">Farmish</span>
-            <span className="mt-1 font-mono text-[8px] uppercase tracking-[0.18em] text-[#53635D]">Farm to Home</span>
+            <span className="mt-1 font-mono text-[8px] uppercase tracking-[0.18em] text-[#53635D]">Farm to Family</span>
           </span>
         </Link>
         <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-8 font-mono text-[11px] uppercase tracking-[0.22em] text-[#53635D] md:flex">
