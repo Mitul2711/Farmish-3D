@@ -42,21 +42,21 @@ export function Caption({ progress, scene }: { progress: MotionValue<number>; sc
       data-testid={`scene-caption-${scene.id}`}
     >
       <motion.div style={{ y }} className={`flex w-full flex-col ${alignCls}`}>
-        <p className="mb-5 font-mono text-[11px] uppercase tracking-[0.3em] text-[#E8B86D]">
+        <p className="mb-5 font-mono text-[11px] uppercase tracking-[0.3em] text-[#A36E1F]">
           {scene.kicker}
         </p>
         {scene.thumb && (
           <motion.img
             src={scene.thumb}
             alt=""
-            className="mb-6 h-28 w-40 rotate-[-3deg] rounded-md object-cover shadow-[0_20px_60px_rgba(0,0,0,0.55)] ring-1 ring-[#D4A359]/30 sm:h-32 sm:w-48"
+            className="mb-6 h-28 w-40 rotate-[-3deg] rounded-md object-cover shadow-[0_18px_50px_rgba(55,44,28,0.14)] ring-1 ring-[#D4A359]/40 sm:h-32 sm:w-48"
           />
         )}
-        <h2 className="font-heading text-4xl leading-[1.04] tracking-tight text-[#F5EFE6] sm:text-5xl lg:text-6xl">
+        <h2 className="font-heading text-4xl leading-[1.04] tracking-tight text-[#1D2B25] sm:text-5xl lg:text-6xl">
           <MaskedLine text={scene.title[0]} y={line1Y} />
-          <MaskedLine text={scene.title[1]} y={line2Y} className="italic text-[#E8B86D]" />
+          <MaskedLine text={scene.title[1]} y={line2Y} className="italic text-[#A36E1F]" />
         </h2>
-        <motion.p style={{ opacity: subOpacity }} className="mt-5 max-w-md text-base leading-relaxed text-[#CAD4C9]">
+        <motion.p style={{ opacity: subOpacity }} className="mt-5 max-w-md text-base leading-relaxed text-[#4F5F59]">
           {scene.sub}
         </motion.p>
       </motion.div>
@@ -98,11 +98,11 @@ export function HeroIntro({ progress }: { progress: MotionValue<number> }) {
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 0.45, ease: EASE }}
-        className="mb-6 font-mono text-[11px] uppercase tracking-[0.35em] text-[#E8B86D]"
+        className="mb-6 font-mono text-[11px] uppercase tracking-[0.35em] text-[#E7DDC7]"
       >
         Farmish · Farmer-Direct Grocery
       </motion.p>
-      <h1 className="font-heading text-4xl leading-[1.03] tracking-tight text-[#FAF7F2] sm:text-5xl lg:text-6xl">
+      <h1 className="font-heading text-4xl leading-[1.03] tracking-tight text-[#1D2B25] sm:text-5xl lg:text-6xl">
         <span className="block overflow-hidden pb-[0.08em]">
           <motion.span
             initial={{ y: "112%" }}
@@ -118,7 +118,7 @@ export function HeroIntro({ progress }: { progress: MotionValue<number> }) {
             initial={{ y: "112%" }}
             animate={{ y: "0%" }}
             transition={{ duration: 1.1, delay: 0.74, ease: EASE }}
-            className="block italic text-[#E8B86D]"
+            className="block italic text-[#A36E1F]"
           >
             To Your Home.
           </motion.span>
@@ -128,7 +128,7 @@ export function HeroIntro({ progress }: { progress: MotionValue<number> }) {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 1.05, ease: EASE }}
-        className="mt-7 text-base text-[#CAD4C9] sm:text-lg"
+        className="mt-7 text-base text-[#E7DDC7] sm:text-lg"
       >
         Good food begins with good farmers.
       </motion.p>
@@ -137,7 +137,7 @@ export function HeroIntro({ progress }: { progress: MotionValue<number> }) {
         className="absolute bottom-9 flex flex-col items-center gap-3"
         data-testid="scroll-indicator"
       >
-        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#A8B3A7]">
+        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#53635D]">
           Scroll to discover the journey
         </span>
         <motion.span animate={{ y: [0, 7, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>

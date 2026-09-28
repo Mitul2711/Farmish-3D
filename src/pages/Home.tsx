@@ -43,7 +43,7 @@ export default function Home() {
   }, [reduced]);
 
   return (
-    <div id="top" className="min-h-screen overflow-x-clip bg-[#0D130E] text-[#F5EFE6] antialiased">
+    <div id="top" className="min-h-screen overflow-x-clip bg-[#F7F2E8] text-[#1D2B25] antialiased">
       <div className="farmish-grain" aria-hidden="true" />
       <NavigationHeader />
       {reduced ? <StaticJourney /> : <Journey isMobile={isMobile} />}

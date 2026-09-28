@@ -13,7 +13,7 @@ const ITEMS = [
 export function EditorialMarquee() {
   return (
     <section
-      className="relative overflow-hidden border-y border-[#213023] bg-[#0D130E] py-7"
+      className="relative overflow-hidden border-y border-[#E8D9BF] bg-[#F7F2E8] py-7"
       data-testid="editorial-marquee"
     >
       <div className="animate-farmish-marquee flex w-max">
@@ -22,7 +22,7 @@ export function EditorialMarquee() {
             {ITEMS.map((item) => (
               <span
                 key={`${half}-${item}`}
-                className="flex items-center gap-8 px-8 font-mono text-xs uppercase tracking-[0.3em] text-[#A8B3A7]"
+                className="flex items-center gap-8 px-8 font-mono text-xs uppercase tracking-[0.3em] text-[#53635D]"
               >
                 {item}
                 <WheatMark className="h-4 w-4 text-[#D4A359]/70" />

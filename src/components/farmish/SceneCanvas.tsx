@@ -281,7 +281,7 @@ export function SceneCanvas({ isMobile }: { isMobile: boolean }) {
         camera={{ fov: 42, position: [0, 0, 11], near: 0.1, far: 60 }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
       >
-        <color attach="background" args={["#0D130E"]} />
+        <color attach="background" args={["#F7F2E8"]} />
         <Suspense fallback={null}>
           <CameraRig />
           {SCENES.map((s, i) => (

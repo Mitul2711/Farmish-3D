@@ -52,37 +52,37 @@
 }
 
 :root {
-    --background: #0D130E;
-    --foreground: #F5EFE6;
-    --card: #151F17;
-    --card-foreground: #F5EFE6;
-    --popover: #151F17;
-    --popover-foreground: #F5EFE6;
+    --background: #F7F2E8;
+    --foreground: #1D2B25;
+    --card: #FFFDF9;
+    --card-foreground: #1D2B25;
+    --popover: #FFFDF9;
+    --popover-foreground: #1D2B25;
     --primary: #D4A359;
-    --primary-foreground: #0D130E;
-    --secondary: #233326;
-    --secondary-foreground: #E3D3B8;
-    --muted: #1A241C;
-    --muted-foreground: #A8B3A7;
-    --accent: #233326;
-    --accent-foreground: #E8D3B0;
-    --destructive: #FF6B6B;
-    --border: #213023;
-    --input: #2D3F30;
+    --primary-foreground: #1D2B25;
+    --secondary: #F3E7D2;
+    --secondary-foreground: #433C34;
+    --muted: #F0E8DA;
+    --muted-foreground: #5D6A63;
+    --accent: #F3E7D2;
+    --accent-foreground: #2D3A34;
+    --destructive: #C85D4D;
+    --border: #E8D9BF;
+    --input: #F5EEDF;
     --ring: #D4A359;
     --chart-1: #D4A359;
-    --chart-2: #4E7B50;
+    --chart-2: #5F8C63;
     --chart-3: #E8B86D;
-    --chart-4: #8A6B4F;
-    --chart-5: #A8B3A7;
+    --chart-4: #C98D62;
+    --chart-5: #A9A38B;
     --radius: 0.625rem;
-    --sidebar: #0D130E;
-    --sidebar-foreground: #F5EFE6;
+    --sidebar: #F7F2E8;
+    --sidebar-foreground: #1D2B25;
     --sidebar-primary: #D4A359;
-    --sidebar-primary-foreground: #0D130E;
-    --sidebar-accent: #233326;
-    --sidebar-accent-foreground: #E8D3B0;
-    --sidebar-border: #213023;
+    --sidebar-primary-foreground: #1D2B25;
+    --sidebar-accent: #F3E7D2;
+    --sidebar-accent-foreground: #2D3A34;
+    --sidebar-border: #E8D9BF;
     --sidebar-ring: #D4A359;
 }
 
@@ -134,7 +134,7 @@
 
 ::selection {
   background: #D4A359;
-  color: #0D130E;
+  color: #1D2B25;
 }
 
 .farmish-grain {
@@ -142,9 +142,9 @@
   position: fixed;
   inset: 0;
   z-index: 50;
-  opacity: 0.035;
-  mix-blend-mode: overlay;
-  background-image: radial-gradient(#fff 1px, transparent 1px);
+  opacity: 0.08;
+  mix-blend-mode: multiply;
+  background-image: radial-gradient(#5a4c3d 1px, transparent 1px);
   background-size: 16px 16px;
 }
 
