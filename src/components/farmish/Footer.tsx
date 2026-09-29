@@ -11,7 +11,7 @@ export function Footer() {
               <WheatMark className="h-8 w-8 text-[#B98A37]" />
               <span className="flex flex-col items-start leading-none">
                 <span className="font-heading text-3xl text-[#1D2B25]">Farmish</span>
-                <span className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.2em] text-[#53635D]">Farm to Home</span>
+                <span className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.2em] text-[#53635D]">Farm to Family</span>
               </span>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-[#53635D]">

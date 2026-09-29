@@ -75,7 +75,7 @@ export default function WhyFarmish() {
         <section className="mx-auto max-w-7xl px-6 py-16 sm:py-20 lg:py-24">
           <div className="grid gap-6 border-b border-[#D9C8A5] pb-10 sm:grid-cols-[0.9fr_1.1fr] sm:items-end sm:gap-12">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#A36E1F]">From farm to home</p>
+              <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-[#A36E1F]">From farm to family</p>
               <h2 className="mt-3 max-w-lg font-heading text-3xl leading-tight text-[#1D2B25] sm:text-4xl">
                 A shorter path makes a better story.
               </h2>
