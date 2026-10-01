@@ -16,7 +16,7 @@ export default function Contact() {
     const message = String(data.get("message") ?? "").trim();
     const body = [`Name: ${name}`, `Email: ${email}`, `Phone: ${phone || "Not provided"}`, "", message].join("\n");
 
-    window.location.href = `mailto:hello@farmish.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = `mailto:care.farmish@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
 
   return (
@@ -60,30 +60,30 @@ export default function Contact() {
           </form>
 
           <section className="space-y-8" aria-label="Farmish contact details">
-            <a href="tel:+919876543210" className="flex items-start gap-4 group">
+            <a href="tel:+919054199879" className="flex items-start gap-4 group">
               <Phone className="mt-1 h-5 w-5 shrink-0 text-[#2E7055]" aria-hidden="true" />
               <span>
                 <span className="block font-heading text-xl text-[#1D2B25]">Phone</span>
-                <span className="mt-1 block text-sm text-[#53635D] transition-colors group-hover:text-[#285A43]">+91 98765 43210</span>
+                <span className="mt-1 block text-sm text-[#53635D] transition-colors group-hover:text-[#285A43]">9054199879</span>
               </span>
             </a>
-            <a href="mailto:hello@farmish.com" className="flex items-start gap-4 group">
+            <a href="mailto:care.farmish@gmail.com" className="flex items-start gap-4 group">
               <Mail className="mt-1 h-5 w-5 shrink-0 text-[#2E7055]" aria-hidden="true" />
               <span>
                 <span className="block font-heading text-xl text-[#1D2B25]">Email</span>
-                <span className="mt-1 block text-sm text-[#53635D] transition-colors group-hover:text-[#285A43]">hello@farmish.com</span>
+                <span className="mt-1 block text-sm text-[#53635D] transition-colors group-hover:text-[#285A43]">care.farmish@gmail.com</span>
               </span>
             </a>
             <div className="flex items-start gap-4">
               <MapPin className="mt-1 h-5 w-5 shrink-0 text-[#2E7055]" aria-hidden="true" />
               <span>
                 <span className="block font-heading text-xl text-[#1D2B25]">Address</span>
-                <span className="mt-1 block text-sm text-[#53635D]">123 Farmish Lane, Gujarat, India</span>
+                <span className="mt-1 block text-sm text-[#53635D]">Valaradi, Babara, Amreli, 365410</span>
               </span>
             </div>
 
             <a
-              href="https://maps.google.com/?q=Gujarat,India"
+              href="https://maps.google.com/?q=Valaradi,Babara,Amreli,365410"
               target="_blank"
               rel="noreferrer"
               className="flex min-h-48 items-center justify-center rounded-2xl border border-dashed border-[#D9C8A5] bg-cover bg-center p-6 text-center transition-colors hover:border-[#A36E1F]"
