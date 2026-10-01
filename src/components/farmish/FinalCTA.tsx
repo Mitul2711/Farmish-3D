@@ -56,8 +56,7 @@ export function FinalCTA() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-15%" }}
           transition={{ duration: 0.9, delay: 0.34, ease: EASE }}
-          className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-[#E7DDC7] sm:text-lg"
-          style={{ textShadow: "0 1px 3px rgba(29, 43, 37, 0.3)" }}
+          className="mx-auto mt-7 max-w-xl text-base leading-relaxed text-[#1D2B25] sm:text-lg"
         >
           Farmish brings carefully selected groceries directly from farmers to your home.
         </motion.p>
