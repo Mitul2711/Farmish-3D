@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
 import Home from "@/pages/Home";
 import Shop from "@/pages/Shop";
@@ -10,6 +11,11 @@ import { Footer } from "@/components/farmish/Footer";
 
 export default function App() {
   const location = useLocation();
+
+  useEffect(() => {
+    if (window.location.hash === "#journey") return;
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <>

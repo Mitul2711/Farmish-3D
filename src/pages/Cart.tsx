@@ -1,6 +1,7 @@
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Check, CheckCircle2, Leaf, LockKeyhole, MapPin, Minus, PackageCheck, Plus, ShoppingBag, Trash2, Truck } from "lucide-react";
+import { CartButton } from "@/components/farmish/CartButton";
 import { NavigationHeader } from "@/components/farmish/NavigationHeader";
 
 type CartItem = {
@@ -69,6 +70,10 @@ export default function Cart() {
     window.localStorage.setItem(CART_KEY, JSON.stringify(cart));
   }, [cart]);
 
+  useEffect(() => {
+    if (checkoutStep > 0) window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [checkoutStep]);
+
   const subtotal = useMemo(
     () => cart.reduce((sum, item) => sum + item.price * item.qty, 0),
     [cart],
@@ -76,6 +81,7 @@ export default function Cart() {
   const delivery = cart.length ? 49 : 0;
   const discount = couponApplied ? Math.round(subtotal * 0.1 * 100) / 100 : 0;
   const total = subtotal + delivery - discount;
+  const cartItemCount = cart.reduce((sum, item) => sum + item.qty, 0);
   const deliveryMethod = "Home Delivery (Within 24 hours)";
   const paymentMethod = "Cash on Delivery";
 
@@ -161,13 +167,7 @@ export default function Cart() {
             <Link to="/shop" className="hidden font-mono text-[10px] uppercase tracking-[0.24em] text-[#53635D] hover:text-[#A36E1F] sm:inline">
               Continue shopping
             </Link>
-            <Link
-              to="/cart"
-              className="inline-flex items-center gap-2 rounded-full bg-[#D4A359] px-4 py-2 text-sm font-semibold text-[#1D2B25]"
-            >
-              <ShoppingBag className="h-4 w-4" />
-              Cart ({cart.reduce((sum, item) => sum + item.qty, 0)})
-            </Link>
+            <CartButton count={cartItemCount} />
           </div>
         )}
       />
@@ -178,13 +178,13 @@ export default function Cart() {
             <div className="text-center">
               <h1 className="font-heading text-4xl text-[#1D2B25]">Checkout</h1>
               <ol aria-label="Checkout progress" className="mx-auto mt-6 flex max-w-2xl items-center justify-center gap-2 sm:gap-4">
-                {["Address", "Delivery", "Payment", "Review"].map((step, index) => (
+                  {["Address", "Delivery", "Payment"].map((step, index) => (
                   <li key={step} aria-current={checkoutStep === index + 1 ? "step" : undefined} className={`flex items-center gap-2 text-xs sm:text-sm ${index < checkoutStep ? "font-medium text-[#285A43]" : "text-[#8A8B80]"}`}>
                     <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[10px] font-semibold ${index < checkoutStep ? "bg-[#285A43] text-white" : "bg-[#E8E4D9] text-white"}`}>
                       {index < checkoutStep - 1 ? <Check className="h-3.5 w-3.5" aria-hidden="true" /> : index + 1}
                     </span>
                     <span>{step}</span>
-                    {index < 3 && <span className={`hidden h-px w-7 sm:block md:w-10 ${index < checkoutStep - 1 ? "bg-[#285A43]" : "bg-[#E8D9BF]"}`} aria-hidden="true" />}
+                    {index < 2 && <span className={`hidden h-px w-7 sm:block md:w-10 ${index < checkoutStep - 1 ? "bg-[#285A43]" : "bg-[#E8D9BF]"}`} aria-hidden="true" />}
                   </li>
                 ))}
               </ol>
@@ -249,9 +249,9 @@ export default function Cart() {
                         <span className="mt-1 block text-sm text-[#53635D]">₹{delivery.toFixed(0)}</span>
                       </span>
                     </label>
-                    <div className="mt-8 flex justify-between border-t border-[#E8D9BF] pt-6">
-                      <button type="button" onClick={() => setCheckoutStep(1)} className="rounded-md border border-[#285A43] px-6 py-3 text-sm text-[#285A43] transition hover:bg-[#F7F2E8]">Back</button>
-                      <button type="button" onClick={() => setCheckoutStep(3)} className="rounded-md bg-[#285A43] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#1D4432]">Continue to Payment</button>
+                    <div className="mt-8 flex flex-col gap-3 border-t border-[#E8D9BF] pt-6 sm:flex-row sm:justify-between">
+                      <button type="button" onClick={() => setCheckoutStep(1)} className="w-full rounded-md border border-[#285A43] px-6 py-3 text-sm text-[#285A43] transition hover:bg-[#F7F2E8] sm:w-auto">Back</button>
+                      <button type="button" onClick={() => setCheckoutStep(3)} className="w-full whitespace-nowrap rounded-md bg-[#285A43] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#1D4432] sm:w-auto sm:px-6">Continue to Payment</button>
                     </div>
                   </div>
                 )}
@@ -272,41 +272,9 @@ export default function Cart() {
                       </span>
                     </label>
                     <p className="mt-4 border-l-2 border-[#D4A359] bg-[#F7F2E8] px-4 py-3 text-sm text-[#53635D]">Only Cash on Delivery is available for Farmish orders.</p>
-                    <div className="mt-8 flex justify-between border-t border-[#E8D9BF] pt-6">
-                      <button type="button" onClick={() => setCheckoutStep(2)} className="rounded-md border border-[#285A43] px-6 py-3 text-sm text-[#285A43] transition hover:bg-[#F7F2E8]">Back</button>
-                      <button type="button" onClick={() => setCheckoutStep(4)} className="rounded-md bg-[#285A43] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#1D4432]">Review Order</button>
-                    </div>
-                  </div>
-                )}
-
-                {checkoutStep === 4 && checkoutAddress && (
-                  <div>
-                    <div className="border-b border-[#E8D9BF] pb-3">
-                      <h2 className="font-heading text-2xl text-[#1D2B25]">Review Order</h2>
-                    </div>
-                    <div className="mt-5">
-                      <h3 className="font-heading text-lg text-[#285A43]">Delivery Address</h3>
-                      <div className="mt-2 rounded-lg bg-[#F7F2E8] p-4 text-sm leading-relaxed text-[#53635D]">
-                        <p className="font-semibold text-[#1D2B25]">{checkoutAddress.fullName}</p>
-                        <p>{checkoutAddress.street}</p>
-                        <p>{checkoutAddress.city}, {checkoutAddress.state} {checkoutAddress.postalCode}</p>
-                        <p>Phone: {checkoutAddress.phone}</p>
-                        {checkoutAddress.email && <p>Email: {checkoutAddress.email}</p>}
-                      </div>
-                    </div>
-                    <div className="mt-5 grid gap-5 sm:grid-cols-2">
-                      <div>
-                        <h3 className="font-heading text-lg text-[#285A43]">Delivery Method</h3>
-                        <p className="mt-2 rounded-lg bg-[#F7F2E8] p-4 text-sm text-[#53635D]">{deliveryMethod}</p>
-                      </div>
-                      <div>
-                        <h3 className="font-heading text-lg text-[#285A43]">Payment Method</h3>
-                        <p className="mt-2 rounded-lg bg-[#F7F2E8] p-4 text-sm text-[#53635D]">{paymentMethod}</p>
-                      </div>
-                    </div>
-                    <div className="mt-8 flex justify-between border-t border-[#E8D9BF] pt-6">
-                      <button type="button" onClick={() => setCheckoutStep(3)} className="rounded-md border border-[#285A43] px-6 py-3 text-sm text-[#285A43] transition hover:bg-[#F7F2E8]">Back</button>
-                      <button type="button" onClick={placeOrder} className="inline-flex items-center gap-2 rounded-md bg-[#285A43] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#1D4432]">
+                    <div className="mt-8 flex flex-col gap-3 border-t border-[#E8D9BF] pt-6 sm:flex-row sm:justify-between">
+                      <button type="button" onClick={() => setCheckoutStep(2)} className="w-full rounded-md border border-[#285A43] px-6 py-3 text-sm text-[#285A43] transition hover:bg-[#F7F2E8] sm:w-auto">Back</button>
+                      <button type="button" onClick={placeOrder} className="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-md bg-[#285A43] px-4 py-3 text-sm font-semibold text-white transition hover:bg-[#1D4432] sm:w-auto sm:px-6">
                         <LockKeyhole className="h-4 w-4" aria-hidden="true" />
                         Place Order · ₹{total.toFixed(0)}
                       </button>

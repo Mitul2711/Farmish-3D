@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Heart, ShoppingBag } from "lucide-react";
 import { Link } from "react-router-dom";
+import { CartButton } from "@/components/farmish/CartButton";
 import { NavigationHeader } from "@/components/farmish/NavigationHeader";
 import { addProductToCart, products, readCartCount, readFavoriteIds, saveFavoriteIds } from "@/lib/shopProducts";
 
@@ -28,15 +29,7 @@ export default function Favorites() {
     <div className="min-h-screen bg-[#F7F2E8] text-[#1D2B25] antialiased">
       <NavigationHeader
         sticky
-        action={(
-          <Link
-            to="/cart"
-            className="inline-flex items-center gap-2 rounded-full bg-[#D4A359] px-4 py-2.5 text-sm font-semibold text-[#1D2B25] transition-all duration-300 hover:bg-[#E8B86D]"
-          >
-            <ShoppingBag className="h-4 w-4" />
-            Cart {cartCount > 0 ? `(${cartCount})` : ""}
-          </Link>
-        )}
+        action={<CartButton count={cartCount} />}
       />
 
       <main className="mx-auto max-w-7xl px-6 pb-20 pt-12 sm:pt-16">

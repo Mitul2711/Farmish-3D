@@ -21,12 +21,13 @@ function MaskedLine({ text, y, className }: { text: string; y: MotionValue<strin
 export function Caption({ progress, scene }: { progress: MotionValue<number>; scene: SceneDef }) {
   const [a, b] = scene.captionRange;
   const fi = a + (b - a) * 0.3;
-  const fo = b - (b - a) * 0.2;
+  const fo = b - (b - a) * 0.3;
   const opacity = useTransform(progress, [a, fi, fo, b], [0, 1, 1, 0]);
   const y = useTransform(progress, [a, b], [70, -70]);
   const line1Y = useTransform(progress, [a, fi], ["112%", "0%"]);
   const line2Y = useTransform(progress, [a + 0.012, fi + 0.018], ["112%", "0%"]);
   const subOpacity = useTransform(progress, [a + 0.02, fi + 0.03, fo, b], [0, 1, 1, 0]);
+  const isDarkScene = scene.id === "beans";
 
   const alignCls =
     scene.align === "left"
@@ -42,7 +43,7 @@ export function Caption({ progress, scene }: { progress: MotionValue<number>; sc
       data-testid={`scene-caption-${scene.id}`}
     >
       <motion.div style={{ y }} className={`flex w-full flex-col ${alignCls}`}>
-        <p className="mb-5 font-mono text-[11px] uppercase tracking-[0.3em] text-[#A36E1F]">
+        <p className={`mb-5 font-mono text-[11px] uppercase tracking-[0.3em] ${isDarkScene ? "text-[#FFE2A3]" : "text-[#6B4310]"}`}>
           {scene.kicker}
         </p>
         {scene.thumb && (
@@ -52,11 +53,11 @@ export function Caption({ progress, scene }: { progress: MotionValue<number>; sc
             className="mb-6 h-28 w-40 rotate-[-3deg] rounded-md object-cover shadow-[0_18px_50px_rgba(55,44,28,0.14)] ring-1 ring-[#D4A359]/40 sm:h-32 sm:w-48"
           />
         )}
-        <h2 className="font-heading text-4xl leading-[1.04] tracking-tight text-[#1D2B25] sm:text-5xl lg:text-6xl">
+        <h2 className={`font-heading text-4xl leading-[1.04] tracking-tight ${isDarkScene ? "text-[#FFFDF9]" : "text-[#1D2B25]"} sm:text-5xl lg:text-6xl`}>
           <MaskedLine text={scene.title[0]} y={line1Y} />
-          <MaskedLine text={scene.title[1]} y={line2Y} className="italic text-[#A36E1F]" />
+          <MaskedLine text={scene.title[1]} y={line2Y} className={`italic ${isDarkScene ? "text-[#FFE2A3]" : "text-[#6B4310]"}`} />
         </h2>
-        <motion.p style={{ opacity: subOpacity }} className="mt-5 max-w-md text-base leading-relaxed text-[#4F5F59]">
+        <motion.p style={{ opacity: subOpacity }} className={`mt-5 max-w-md text-base leading-relaxed ${isDarkScene ? "text-[#FFFDF9]" : "text-[#1D2B25]"}`}>
           {scene.sub}
         </motion.p>
       </motion.div>
@@ -85,6 +86,7 @@ export function HeroIntro({ progress }: { progress: MotionValue<number> }) {
     <div
       ref={wrapRef}
       className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center"
+      style={{ textShadow: "0 1px 3px rgba(17, 27, 18, 0.9), 0 2px 10px rgba(17, 27, 18, 0.65)" }}
       data-testid="hero-intro"
     >
       <motion.div
@@ -98,11 +100,11 @@ export function HeroIntro({ progress }: { progress: MotionValue<number> }) {
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 0.45, ease: EASE }}
-        className="mb-6 font-mono text-[11px] uppercase tracking-[0.35em] text-[#1D2B25]"
+        className="mb-6 font-mono text-[11px] uppercase tracking-[0.35em] text-[#FFFDF9]"
       >
         Farmish · Farmer-Direct Grocery
       </motion.p>
-      <h1 className="font-heading text-4xl leading-[1.03] tracking-tight text-[#1D2B25] sm:text-5xl lg:text-6xl">
+      <h1 className="font-heading text-4xl leading-[1.03] tracking-tight text-[#FFFDF9] sm:text-5xl lg:text-6xl">
         <span className="block overflow-hidden pb-[0.08em]">
           <motion.span
             initial={{ y: "112%" }}
@@ -118,7 +120,7 @@ export function HeroIntro({ progress }: { progress: MotionValue<number> }) {
             initial={{ y: "112%" }}
             animate={{ y: "0%" }}
             transition={{ duration: 1.1, delay: 0.74, ease: EASE }}
-            className="block italic text-[#A36E1F]"
+            className="block italic text-[#FFE2A3]"
           >
             To Your Home.
           </motion.span>
@@ -128,7 +130,7 @@ export function HeroIntro({ progress }: { progress: MotionValue<number> }) {
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 1.05, ease: EASE }}
-        className="mt-7 text-base text-[#E7DDC7] sm:text-lg"
+        className="mt-7 text-base text-[#FFFDF9] sm:text-lg"
       >
         Good food begins with good farmers.
       </motion.p>
@@ -137,7 +139,7 @@ export function HeroIntro({ progress }: { progress: MotionValue<number> }) {
         className="absolute bottom-9 flex flex-col items-center gap-3"
         data-testid="scroll-indicator"
       >
-        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#53635D]">
+        <span className="font-mono text-[10px] uppercase tracking-[0.3em] text-[#FFFDF9]">
           Scroll to discover the journey
         </span>
         <motion.span animate={{ y: [0, 7, 0] }} transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}>
