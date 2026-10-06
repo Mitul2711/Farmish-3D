@@ -5,11 +5,10 @@ export const IMGS = {
   harvest: "https://static.prod-images.emergentagent.com/jobs/3ac92bb0-d896-4715-9198-cd766c03ba36/images/38d868f3b626e6ba5b213759046b2426040f929f766a9cd2b91d21fb8b615443.jpeg",
   selection: "https://static.prod-images.emergentagent.com/jobs/3ac92bb0-d896-4715-9198-cd766c03ba36/images/f42542205f5e6909ce1d4751bf61f11686e8ca55fd06eb2dc9a85d126979d328.jpeg",
   beans: "https://static.prod-images.emergentagent.com/jobs/3ac92bb0-d896-4715-9198-cd766c03ba36/images/85b54e79a4b41a88b03141db456db2b070d5594dc29574166f7243355a3b1e43.jpeg",
-  pack: "https://static.prod-images.emergentagent.com/jobs/3ac92bb0-d896-4715-9198-cd766c03ba36/images/bb9c7ff32449fb1d87c4fc159010008f9f134262b981d5b4bf981904a0bfc2c8.jpeg",
+  pack: "/textures/package-branded.jpg",
   delivery: "https://static.prod-images.emergentagent.com/jobs/3ac92bb0-d896-4715-9198-cd766c03ba36/images/e00da11fbbbbe350e7adc18063ebf78042b09a2eb3de15c1cc76b4434f3a8e0e.jpeg",
   landscape: "https://static.prod-images.emergentagent.com/jobs/3ac92bb0-d896-4715-9198-cd766c03ba36/images/53fae9a805f62afe49f8fb1c911a894feaeea7f03589718486cd439b8e75a465.jpeg",
   beansMacro: "https://static.prod-images.emergentagent.com/jobs/3ac92bb0-d896-4715-9198-cd766c03ba36/images/4ce56e8af7ef2327de27910af7fad0601e1dbdfaacd563ec2244111ce5f31652.jpeg",
-  packDetail: "https://static.prod-images.emergentagent.com/jobs/3ac92bb0-d896-4715-9198-cd766c03ba36/images/4171a18331c60c25440a3e831e0b14d05c64e1832d745ebdcca873928c6ebaf7.jpeg",
 };
 
 export interface SceneDef {
@@ -75,7 +74,6 @@ export const SCENES: SceneDef[] = [
     title: ["The Farmish", "standard."],
     sub: "Small-batch sealed in breathable kraft. Honest by design.",
     align: "center",
-    thumb: IMGS.packDetail,
   },
   {
     id: "delivery",

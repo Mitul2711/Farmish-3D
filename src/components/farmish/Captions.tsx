@@ -27,8 +27,6 @@ export function Caption({ progress, scene }: { progress: MotionValue<number>; sc
   const line1Y = useTransform(progress, [a, fi], ["112%", "0%"]);
   const line2Y = useTransform(progress, [a + 0.012, fi + 0.018], ["112%", "0%"]);
   const subOpacity = useTransform(progress, [a + 0.02, fi + 0.03, fo, b], [0, 1, 1, 0]);
-  const isDarkScene = scene.id === "beans";
-
   const alignCls =
     scene.align === "left"
       ? "items-start text-left pl-[7vw] pr-6"
@@ -42,8 +40,11 @@ export function Caption({ progress, scene }: { progress: MotionValue<number>; sc
       className="pointer-events-none absolute inset-0 z-20 flex items-center"
       data-testid={`scene-caption-${scene.id}`}
     >
-      <motion.div style={{ y }} className={`flex w-full flex-col ${alignCls}`}>
-        <p className={`mb-5 font-mono text-[11px] uppercase tracking-[0.3em] ${isDarkScene ? "text-[#FFE2A3]" : "text-[#6B4310]"}`}>
+      <motion.div
+        style={{ y, textShadow: "0 2px 5px rgba(17,27,18,0.95), 0 5px 18px rgba(17,27,18,0.8)" }}
+        className={`flex w-full flex-col ${alignCls}`}
+      >
+        <p className="mb-5 font-mono text-[11px] uppercase tracking-[0.3em] text-[#FFE2A3]">
           {scene.kicker}
         </p>
         {scene.thumb && (
@@ -53,11 +54,11 @@ export function Caption({ progress, scene }: { progress: MotionValue<number>; sc
             className="mb-6 h-28 w-40 rotate-[-3deg] rounded-md object-cover shadow-[0_18px_50px_rgba(55,44,28,0.14)] ring-1 ring-[#D4A359]/40 sm:h-32 sm:w-48"
           />
         )}
-        <h2 className={`font-heading text-4xl leading-[1.04] tracking-tight ${isDarkScene ? "text-[#FFFDF9]" : "text-[#1D2B25]"} sm:text-5xl lg:text-6xl`}>
+        <h2 className="font-heading text-4xl leading-[1.04] tracking-tight text-[#FFFDF9] sm:text-5xl lg:text-6xl">
           <MaskedLine text={scene.title[0]} y={line1Y} />
-          <MaskedLine text={scene.title[1]} y={line2Y} className={`italic ${isDarkScene ? "text-[#FFE2A3]" : "text-[#6B4310]"}`} />
+          <MaskedLine text={scene.title[1]} y={line2Y} className="italic text-[#FFE2A3]" />
         </h2>
-        <motion.p style={{ opacity: subOpacity }} className={`mt-5 max-w-md text-base leading-relaxed ${isDarkScene ? "text-[#FFFDF9]" : "text-[#1D2B25]"}`}>
+        <motion.p style={{ opacity: subOpacity }} className="mt-5 max-w-md text-base leading-relaxed text-[#FFFDF9]">
           {scene.sub}
         </motion.p>
       </motion.div>
@@ -86,7 +87,10 @@ export function HeroIntro({ progress }: { progress: MotionValue<number> }) {
     <div
       ref={wrapRef}
       className="pointer-events-none absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center"
-      style={{ textShadow: "0 1px 3px rgba(17, 27, 18, 0.9), 0 2px 10px rgba(17, 27, 18, 0.65)" }}
+      style={{
+        background: "radial-gradient(ellipse at 50% 50%, rgba(17,27,18,0.38) 0%, rgba(17,27,18,0.18) 38%, rgba(17,27,18,0) 72%)",
+        textShadow: "0 2px 4px rgba(17, 27, 18, 0.95), 0 4px 16px rgba(17, 27, 18, 0.8)",
+      }}
       data-testid="hero-intro"
     >
       <motion.div
@@ -100,7 +104,7 @@ export function HeroIntro({ progress }: { progress: MotionValue<number> }) {
         initial={{ opacity: 0, y: 14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.9, delay: 0.45, ease: EASE }}
-        className="mb-6 font-mono text-[11px] uppercase tracking-[0.35em] text-[#FFFDF9]"
+        className="mb-6 font-mono text-[11px] uppercase tracking-[0.35em] text-[#FFE2A3]"
       >
         Farmish · Farmer-Direct Grocery
       </motion.p>
