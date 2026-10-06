@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { WheatMark } from "./Logo";
+import { WheatMark, Wordmark } from "./Logo";
 
 export function Footer() {
   return (
@@ -8,10 +8,10 @@ export function Footer() {
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-[1.4fr_0.7fr_1fr] lg:gap-16">
           <div>
             <Link to="/" className="inline-flex items-center gap-3" aria-label="Farmish home">
-              <WheatMark className="h-8 w-8 text-[#B98A37]" />
-              <span className="flex flex-col items-start leading-none">
-                <span className="font-heading text-3xl text-[#1D2B25]">Farmish</span>
-                <span className="mt-1.5 font-mono text-[9px] uppercase tracking-[0.2em] text-[#53635D]">Farm to Family</span>
+              <WheatMark className="h-10 w-10" />
+              <span className="flex flex-col items-center leading-none">
+                <Wordmark className="h-12 w-32" />
+                <span className="mt-1.5 w-full text-center font-mono text-[9px] uppercase tracking-[0.2em] text-[#53635D]">Farm to Family</span>
               </span>
             </Link>
             <p className="mt-4 max-w-sm text-sm leading-relaxed text-[#53635D]">

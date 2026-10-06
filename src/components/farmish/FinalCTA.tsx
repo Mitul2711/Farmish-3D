@@ -31,7 +31,7 @@ export function FinalCTA() {
           viewport={{ once: true, margin: "-15%" }}
           transition={{ duration: 0.9, ease: EASE }}
         >
-          <WheatMark className="mx-auto mb-8 h-12 w-12 text-[#D4A359]" />
+          <WheatMark className="mx-auto mb-4 h-16 w-16 text-[#D4A359]" />
         </motion.div>
         <motion.p
           initial={{ opacity: 0, y: 16 }}

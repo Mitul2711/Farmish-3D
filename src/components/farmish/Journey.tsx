@@ -3,7 +3,7 @@ import { useScroll, useMotionValueEvent } from "motion/react";
 import { useProgress } from "@react-three/drei";
 import { SceneCanvas } from "./SceneCanvas";
 import { Caption, HeroIntro, ProgressRail } from "./Captions";
-import { WheatMark } from "./Logo";
+import { WheatMark, Wordmark } from "./Logo";
 import { SCENES, journeyProgress } from "@/lib/journeyStore";
 
 function LoaderOverlay() {
@@ -25,7 +25,7 @@ function LoaderOverlay() {
       data-testid="loader-overlay"
     >
       <WheatMark className="mb-6 h-12 w-12 animate-pulse text-[#D4A359]" />
-      <p className="font-heading text-2xl tracking-tight text-[#1D2B25]">Farmish</p>
+      <Wordmark className="h-10 w-36" />
       <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.3em] text-[#53635D]">
         Preparing the field · {Math.round(progress)}%
       </p>

@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
-import { WheatMark } from "@/components/farmish/Logo";
+import { WheatMark, Wordmark } from "@/components/farmish/Logo";
 
 type LoginProps = {
   mode?: "signin" | "signup";
@@ -29,11 +29,11 @@ export default function Login({ mode = "signin" }: LoginProps) {
     <main className="flex min-h-svh items-center justify-center bg-gradient-to-br from-[#F7F2E8] via-[#F3E7D2] to-[#E8D9BF] px-6 py-12 text-[#1D2B25] antialiased">
       <section aria-label="Farmish sign in" className="grid w-full max-w-6xl items-center gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:gap-20">
         <div>
-          <Link to="/" className="inline-flex items-center gap-3" aria-label="Farmish home">
-            <WheatMark className="h-9 w-9 text-[#A36E1F]" />
-            <span>
-              <span className="block font-heading text-2xl leading-none text-[#1D2B25]">Farmish</span>
-              <span className="mt-1 block font-mono text-[8px] uppercase tracking-[0.2em] text-[#53635D]">Farm to Family</span>
+          <Link to="/" className="inline-flex items-center gap-2.5" aria-label="Farmish home">
+            <WheatMark className="h-10 w-10" />
+            <span className="flex flex-col items-center leading-none">
+              <Wordmark className="h-8 w-24" />
+              <span className="mt-1 w-full text-center font-mono text-[8px] uppercase tracking-[0.18em] text-[#53635D]">Farm to Family</span>
             </span>
           </Link>
 

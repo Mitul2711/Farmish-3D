@@ -94,7 +94,7 @@ export function HeroIntro({ progress }: { progress: MotionValue<number> }) {
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 1, delay: 0.25, ease: EASE }}
       >
-        <WheatMark className="mx-auto mb-7 h-11 w-11 text-[#D4A359]" />
+        <WheatMark className="mx-auto mb-7 h-14 w-14 text-[#D4A359]" />
       </motion.div>
       <motion.p
         initial={{ opacity: 0, y: 14 }}

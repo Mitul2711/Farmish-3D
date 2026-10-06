@@ -1,23 +1,22 @@
 export function WheatMark({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 64 64" fill="none" className={className} aria-hidden="true">
-      <path d="M32 52V24" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
-      <g fill="currentColor">
-        <path d="M32 26C32 26 26.8 23.4 25.6 15.6C25.6 15.6 31.6 17.2 32 26Z" />
-        <path d="M32 26C32 26 37.2 23.4 38.4 15.6C38.4 15.6 32.4 17.2 32 26Z" />
-        <path d="M32 35C32 35 26.2 32.6 24.6 24.2C24.6 24.2 31 25.8 32 35Z" opacity="0.85" />
-        <path d="M32 35C32 35 37.8 32.6 39.4 24.2C39.4 24.2 33 25.8 32 35Z" opacity="0.85" />
-        <path d="M32 44C32 44 26.2 41.6 24.6 33.2C24.6 33.2 31 34.8 32 44Z" opacity="0.7" />
-        <path d="M32 44C32 44 37.8 41.6 39.4 33.2C39.4 33.2 33 34.8 32 44Z" opacity="0.7" />
-      </g>
-    </svg>
+    <img
+      src="/farmish-logo.png"
+      alt=""
+      aria-hidden="true"
+      draggable={false}
+      className={`object-contain ${className ?? ""}`}
+    />
   );
 }
 
 export function Wordmark({ className }: { className?: string }) {
   return (
-    <span className={`font-heading tracking-tight ${className ?? ""}`}>
-      Farmish
-    </span>
+    <img
+      src="/farmish-text.png"
+      alt="Farmish"
+      draggable={false}
+      className={`object-contain ${className ?? ""}`}
+    />
   );
 }
