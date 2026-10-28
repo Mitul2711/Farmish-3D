@@ -1,6 +1,6 @@
-import { Suspense, useLayoutEffect, useMemo, useRef } from "react";
+import { Suspense, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useTexture } from "@react-three/drei";
+import { Environment, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 import { SCENES, journeyProgress } from "@/lib/journeyStore";
 import type { SceneDef } from "@/lib/journeyStore";
@@ -13,6 +13,54 @@ const sstep = (a: number, b: number, x: number) => {
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
 let smooth = 0;
+
+const DAYLIGHT_STOPS = [
+  { progress: 0, sky: new THREE.Color("#f3d9b8"), sun: new THREE.Color("#f2ad68"), intensity: 1.05 },
+  { progress: 0.5, sky: new THREE.Color("#f7f2e8"), sun: new THREE.Color("#fff0d2"), intensity: 1.65 },
+  { progress: 1, sky: new THREE.Color("#e9b18a"), sun: new THREE.Color("#e88852"), intensity: 1.05 },
+];
+
+function TimeOfDayLighting() {
+  const sun = useRef<THREE.DirectionalLight>(null);
+
+  useFrame(({ scene }) => {
+    const light = sun.current;
+    if (!light) return;
+
+    const p = clamp01(smooth);
+    const segment = p <= 0.5 ? 0 : 1;
+    const from = DAYLIGHT_STOPS[segment];
+    const to = DAYLIGHT_STOPS[segment + 1];
+    const local = segment === 0 ? p * 2 : (p - 0.5) * 2;
+    const sky = scene.background;
+    if (sky instanceof THREE.Color) {
+      sky.copy(from.sky).lerp(to.sky, local);
+    }
+
+    light.color.copy(from.sun).lerp(to.sun, local);
+    light.intensity = lerp(from.intensity, to.intensity, local);
+
+    const angle = (p - 0.5) * Math.PI;
+    light.position.set(Math.sin(angle) * 7, 1.5 + Math.cos(angle) * 6, 6);
+  });
+
+  return (
+    <directionalLight
+      ref={sun}
+      position={[0, 7.5, 6]}
+      castShadow
+      shadow-mapSize-width={1024}
+      shadow-mapSize-height={1024}
+      shadow-camera-left={-8}
+      shadow-camera-right={8}
+      shadow-camera-top={7}
+      shadow-camera-bottom={-7}
+      shadow-camera-near={0.1}
+      shadow-camera-far={30}
+      shadow-bias={-0.0001}
+    />
+  );
+}
 
 function CameraRig() {
   useFrame(({ camera }, delta) => {
@@ -128,8 +176,73 @@ function createBeanGeometry(): THREE.BufferGeometry {
     uvs.setXY(i, u, v);
   }
 
+  geom.setAttribute("uv2", uvs.clone());
   geom.computeVertexNormals();
   return geom;
+}
+
+function createBeanPbrMaps() {
+  const size = 128;
+  const height = new Float32Array(size * size);
+  const roughness = new Uint8Array(size * size * 4);
+  const ao = new Uint8Array(size * size * 4);
+
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const u = (x / size) * Math.PI * 2;
+      const v = (y / size) * Math.PI * 2;
+      const i = y * size + x;
+      height[i] =
+        Math.sin(u * 7 + Math.sin(v * 5)) * 0.012 +
+        Math.sin(v * 13 + Math.cos(u * 9)) * 0.006 +
+        Math.sin((u + v) * 23) * 0.002;
+
+      const roughnessValue = Math.round(220 + Math.sin(u * 11) * 8 + Math.cos(v * 17) * 6);
+      roughness.set([roughnessValue, roughnessValue, roughnessValue, 255], i * 4);
+
+      const occlusion = Math.round(248 - Math.max(0, Math.sin(u * 5 + v * 3)) * 12);
+      ao.set([occlusion, occlusion, occlusion, 255], i * 4);
+    }
+  }
+
+  const normals = new Uint8Array(size * size * 4);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const i = y * size + x;
+      const left = y * size + (x + size - 1) % size;
+      const right = y * size + (x + 1) % size;
+      const down = ((y + size - 1) % size) * size + x;
+      const up = ((y + 1) % size) * size + x;
+      const nx = (height[left] - height[right]) * 12;
+      const ny = (height[down] - height[up]) * 12;
+      const length = Math.sqrt(nx * nx + ny * ny + 1);
+      normals.set(
+        [
+          Math.round((nx / length * 0.5 + 0.5) * 255),
+          Math.round((ny / length * 0.5 + 0.5) * 255),
+          Math.round((1 / length * 0.5 + 0.5) * 255),
+          255,
+        ],
+        i * 4
+      );
+    }
+  }
+
+  const createMap = (data: Uint8Array) => {
+    const texture = new THREE.DataTexture(data, size, size, THREE.RGBAFormat);
+    texture.wrapS = THREE.RepeatWrapping;
+    texture.wrapT = THREE.RepeatWrapping;
+    texture.magFilter = THREE.LinearFilter;
+    texture.minFilter = THREE.LinearMipmapLinearFilter;
+    texture.generateMipmaps = true;
+    texture.needsUpdate = true;
+    return texture;
+  };
+
+  const normalMap = createMap(normals);
+  const roughnessMap = createMap(roughness);
+  const aoMap = createMap(ao);
+  return { normalMap, roughnessMap, aoMap };
 }
 
 function Beans({ count }: { count: number }) {
@@ -143,6 +256,16 @@ function Beans({ count }: { count: number }) {
   }, [textures]);
 
   const beanGeometry = useMemo(() => createBeanGeometry(), []);
+  const pbrMaps = useMemo(() => createBeanPbrMaps(), []);
+  useEffect(
+    () => () => {
+      beanGeometry.dispose();
+      pbrMaps.normalMap.dispose();
+      pbrMaps.roughnessMap.dispose();
+      pbrMaps.aoMap.dispose();
+    },
+    [beanGeometry, pbrMaps]
+  );
   const meshRefs = useRef<(THREE.InstancedMesh | null)[]>([]);
   const matRefs = useRef<(THREE.MeshStandardMaterial | null)[]>([]);
   const perGroup = Math.ceil(count / BEAN_TEXTURE_URLS.length);
@@ -216,14 +339,21 @@ function Beans({ count }: { count: number }) {
           args={[beanGeometry, undefined, perGroup]}
           visible={false}
           renderOrder={10}
+          castShadow
+          receiveShadow
         >
           <meshStandardMaterial
             ref={(el) => {
               matRefs.current[g] = el;
             }}
             map={tex}
-            color="#bca38e"
-            roughness={0.38}
+            normalMap={pbrMaps.normalMap}
+            normalScale={new THREE.Vector2(0.08, 0.08)}
+            roughnessMap={pbrMaps.roughnessMap}
+            aoMap={pbrMaps.aoMap}
+            aoMapIntensity={0.18}
+            color="#ffffff"
+            roughness={0.82}
             metalness={0.02}
             transparent
             depthWrite={false}
@@ -285,19 +415,19 @@ export function SceneCanvas({ isMobile }: { isMobile: boolean }) {
         dpr={[1, isMobile ? 1.5 : 1.8]}
         camera={{ fov: 42, position: [0, 0, 11], near: 0.1, far: 60 }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
+        shadows
       >
         <color attach="background" args={["#F7F2E8"]} />
         <Suspense fallback={null}>
           <CameraRig />
+          <Environment preset="sunset" background={false} />
+          <TimeOfDayLighting />
           {SCENES.map((s, i) => (
             <CoverPlane key={s.id} scene={s} index={i} total={SCENES.length} />
           ))}
           <Beans count={isMobile ? 54 : 96} />
           <Dust count={isMobile ? 120 : 260} />
           <ambientLight intensity={0.7} color="#ede0cf" />
-          <directionalLight position={[4, 5, 8]} intensity={1.7} color="#f2dfc5" />
-          <directionalLight position={[-4, -2, 6]} intensity={0.4} color="#8fb380" />
-          <pointLight position={[0, 0, 8]} intensity={0.9} color="#fff0db" />
         </Suspense>
       </Canvas>
     </div>
